@@ -1,0 +1,51 @@
+services:
+  node1:
+    build: ./backend
+    container_name: tinydb-node1
+    environment:
+      NODE_ID: node1
+      PEERS: "http://node2:8000,http://node3:8000"
+      DATA_DIR: /data
+    ports:
+      - "8001:8000"
+    volumes:
+      - node1-data:/data
+    networks:
+      - tinydb-net
+
+  node2:
+    build: ./backend
+    container_name: tinydb-node2
+    environment:
+      NODE_ID: node2
+      PEERS: "http://node1:8000,http://node3:8000"
+      DATA_DIR: /data
+    ports:
+      - "8002:8000"
+    volumes:
+      - node2-data:/data
+    networks:
+      - tinydb-net
+
+  node3:
+    build: ./backend
+    container_name: tinydb-node3
+    environment:
+      NODE_ID: node3
+      PEERS: "http://node1:8000,http://node2:8000"
+      DATA_DIR: /data
+    ports:
+      - "8003:8000"
+    volumes:
+      - node3-data:/data
+    networks:
+      - tinydb-net
+
+volumes:
+  node1-data:
+  node2-data:
+  node3-data:
+
+networks:
+  tinydb-net:
+    driver: bridge

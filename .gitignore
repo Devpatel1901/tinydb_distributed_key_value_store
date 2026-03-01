@@ -1,0 +1,5 @@
+.vscode/
+
+backend/.venv/
+
+high_level_plan.md
