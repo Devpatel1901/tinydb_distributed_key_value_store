@@ -8,15 +8,16 @@ A 3-node distributed key-value database implementing Raft-inspired leader electi
 docker compose up --build
 ```
 
-This launches three nodes accessible at:
+This launches three backend nodes and the frontend dashboard:
 
-| Node  | Host URL              |
-|-------|-----------------------|
-| node1 | http://localhost:8001 |
-| node2 | http://localhost:8002 |
-| node3 | http://localhost:8003 |
+| Service   | Host URL              |
+|-----------|-----------------------|
+| Dashboard | http://localhost:3000 |
+| node1     | http://localhost:8001 |
+| node2     | http://localhost:8002 |
+| node3     | http://localhost:8003 |
 
-A leader is elected automatically within a few seconds.
+A leader is elected automatically within a few seconds. Open the dashboard at **http://localhost:3000** to visualize the cluster.
 
 ## API Usage
 
@@ -79,7 +80,16 @@ backend/
       client.py       GET/PUT /store, GET /status
       internal.py     /internal/vote, /heartbeat, /replicate
       admin.py        /admin/kill, /admin/restart
-docker-compose.yml    3-node cluster orchestration
+frontend/
+  app/
+    layout.tsx        Root layout with theme support
+    page.tsx          Dashboard page
+  components/
+    cluster-topology  SVG cluster visualization
+    node-card         Per-node stats and actions
+    kv-panel          PUT/GET key-value forms
+    activity-log      Rolling event feed
+docker-compose.yml    Full stack orchestration
 ```
 
 ## Stopping the Cluster

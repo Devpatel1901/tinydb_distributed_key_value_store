@@ -41,6 +41,16 @@ services:
     networks:
       - tinydb-net
 
+  frontend:
+    build: ./frontend
+    container_name: tinydb-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE: "http://localhost"
+    networks:
+      - tinydb-net
+
 volumes:
   node1-data:
   node2-data:
