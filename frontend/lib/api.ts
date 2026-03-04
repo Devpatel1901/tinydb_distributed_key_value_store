@@ -1,8 +1,21 @@
-import type { NodeStatus, StoreReadResponse, StoreWriteResponse } from "./types";
+import type {
+  NodeStatus,
+  StoreDataResponse,
+  StoreReadResponse,
+  StoreWriteResponse,
+} from "./types";
 
 export async function fetchStatus(baseUrl: string): Promise<NodeStatus> {
   const res = await fetch(`${baseUrl}/status`, { cache: "no-store" });
   if (!res.ok) throw new Error(`Status fetch failed: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchStore(
+  baseUrl: string
+): Promise<StoreDataResponse> {
+  const res = await fetch(`${baseUrl}/store`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Store fetch failed: ${res.status}`);
   return res.json();
 }
 

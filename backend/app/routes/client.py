@@ -15,6 +15,13 @@ async def get_status():
     return node_state.status()
 
 
+@router.get("/store")
+async def get_store():
+    if not node_state.alive:
+        raise HTTPException(status_code=503, detail="Node is down")
+    return {"data": dict[str, str](node_state.store.data)}
+
+
 @router.get("/store/{key}", response_model=StoreReadResponse)
 async def get_key(key: str):
     if not node_state.alive:

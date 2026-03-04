@@ -20,6 +20,10 @@ export interface StoreWriteResponse {
   committed: boolean;
 }
 
+export interface StoreDataResponse {
+  data: Record<string, string>;
+}
+
 export interface ActivityEvent {
   id: string;
   timestamp: number;

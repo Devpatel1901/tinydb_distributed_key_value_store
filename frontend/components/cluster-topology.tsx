@@ -1,5 +1,7 @@
 "use client";
 
+import { NodeStorePopover } from "@/components/node-store-popover";
+import { NODE_PORT_MAP } from "@/lib/constants";
 import type { NodeStatus } from "@/lib/types";
 
 interface Props {
@@ -173,6 +175,29 @@ export function ClusterTopology({ statuses }: Props) {
               >
                 term {status.current_term} · ci {status.commit_index}
               </text>
+            )}
+
+            {/* Clickable overlay — popover trigger (only when alive) */}
+            {alive && (
+              <foreignObject
+                x={pos.x - NODE_RADIUS}
+                y={pos.y - NODE_RADIUS}
+                width={NODE_RADIUS * 2}
+                height={NODE_RADIUS * 2}
+              >
+                <div className="w-full h-full flex items-center justify-center">
+                  <NodeStorePopover
+                    nodeId={id}
+                    baseUrl={NODE_PORT_MAP[id]}
+                  >
+                    <button
+                      type="button"
+                      className="w-full h-full rounded-full cursor-pointer border-0 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                      aria-label={`View store for ${id}`}
+                    />
+                  </NodeStorePopover>
+                </div>
+              </foreignObject>
             )}
           </g>
         );
