@@ -12,23 +12,23 @@ export default function DashboardPage() {
   const { statuses, events, addEvent } = useClusterStatus();
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="min-h-screen lg:h-screen flex flex-col lg:overflow-hidden">
       <Header />
 
-      <main className="flex-1 flex min-h-0">
-        {/* Left: Cluster topology visualization */}
-        <div className="w-1/2 flex items-center justify-center border-r p-6">
+      <main className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden">
+        {/* Left: Cluster topology — full width on mobile, 50% on lg+ */}
+        <div className="lg:w-1/2 flex items-center justify-center border-b lg:border-b-0 lg:border-r p-4 lg:p-6 min-h-[280px] sm:min-h-[320px] lg:min-h-0 lg:flex-1">
           <ClusterTopology statuses={statuses} />
         </div>
 
-        {/* Right: Controls & info — flex column, no outer scroll */}
-        <div className="w-1/2 flex flex-col min-h-0 p-4 gap-4 overflow-hidden">
-          {/* Node cards — fixed height row */}
+        {/* Right: Controls & info — grows on mobile (main scrolls), fixed on desktop */}
+        <div className="flex-1 flex flex-col min-h-0 p-4 gap-4 lg:overflow-hidden">
+          {/* Node cards — 1 col mobile, 3 cols tablet+ */}
           <section className="shrink-0">
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
               Nodes
             </h2>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {NODES.map((n) => (
                 <NodeCard
                   key={n.id}
@@ -39,15 +39,15 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* KV operations + Activity log — fills remaining space */}
-          <section className="flex-1 min-h-0 grid grid-cols-2 gap-3">
-            <div className="flex flex-col min-h-0">
+          {/* KV operations + Activity log — stack on mobile, side by side on md+ */}
+          <section className="flex-1 min-h-0 flex flex-col md:grid md:grid-cols-2 gap-3">
+            <div className="flex flex-col min-h-0 shrink-0 md:shrink">
               <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 shrink-0">
                 Operations
               </h2>
               <KVPanel statuses={statuses} onEvent={addEvent} />
             </div>
-            <div className="flex flex-col min-h-0">
+            <div className="flex flex-col flex-1 min-h-[200px]">
               <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 shrink-0">
                 Events
               </h2>

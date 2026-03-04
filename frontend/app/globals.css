@@ -132,8 +132,8 @@
 }
 
 .heartbeat-line {
-  stroke-dasharray: 6 4;
-  animation: dash-flow 0.8s linear infinite;
+  stroke-dasharray: 10 8;
+  animation: dash-flow 1s linear infinite;
 }
 
 @keyframes pulse-ring {

@@ -63,11 +63,11 @@ export function ActivityLog({ events }: Props) {
         ) : (
           <ul className="space-y-1.5">
             {events.map((evt) => (
-              <li key={evt.id} className="flex gap-2 text-sm leading-snug">
+              <li key={evt.id} className="flex gap-2 text-xs sm:text-sm leading-snug">
                 <span className={`shrink-0 ${typeColor(evt.type)}`}>
                   {typeIcon(evt.type)}
                 </span>
-                <span className="flex-1">{evt.message}</span>
+                <span className="flex-1 min-w-0 break-words">{evt.message}</span>
                 <span className="shrink-0 tabular-nums text-xs text-muted-foreground">
                   {formatTime(evt.timestamp)}
                 </span>

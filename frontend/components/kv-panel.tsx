@@ -101,23 +101,24 @@ export function KVPanel({ statuses, onEvent }: Props) {
           <label className="text-xs font-medium text-muted-foreground">
             PUT
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               placeholder="key"
               value={putKeyInput}
               onChange={(e) => setPutKeyInput(e.target.value)}
-              className="flex-1"
+              className="flex-1 min-w-0"
             />
             <Input
               placeholder="value"
               value={putValueInput}
               onChange={(e) => setPutValueInput(e.target.value)}
-              className="flex-1"
+              className="flex-1 min-w-0"
             />
             <Button
               size="sm"
               disabled={loading || !leaderUrl}
               onClick={handlePut}
+              className="shrink-0"
             >
               PUT
             </Button>
@@ -129,14 +130,14 @@ export function KVPanel({ statuses, onEvent }: Props) {
           <label className="text-xs font-medium text-muted-foreground">
             GET
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               placeholder="key"
               value={getKeyInput}
               onChange={(e) => setGetKeyInput(e.target.value)}
-              className="flex-1"
+              className="flex-1 min-w-0"
             />
-            <Button size="sm" disabled={loading} onClick={handleGet}>
+            <Button size="sm" disabled={loading} onClick={handleGet} className="shrink-0">
               GET
             </Button>
           </div>

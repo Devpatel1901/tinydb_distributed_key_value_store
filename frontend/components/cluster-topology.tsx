@@ -70,7 +70,7 @@ export function ClusterTopology({ statuses }: Props) {
 
   return (
     <svg viewBox="0 0 600 470" className="w-full h-full">
-      {/* Connection lines */}
+      {/* Connection lines — dotted lines outward from leader to followers */}
       {CONNECTIONS.map(([a, b]) => {
         const pa = POSITIONS[a];
         const pb = POSITIONS[b];
@@ -79,18 +79,21 @@ export function ClusterTopology({ statuses }: Props) {
         const bothAlive = aStatus?.alive !== false && bStatus?.alive !== false;
         const isHeartbeat =
           bothAlive && (leaderId === a || leaderId === b);
+        // Ensure line direction: leader → follower (so dash animation flows outward from leader)
+        const [from, to] =
+          leaderId === b ? [pb, pa] : [pa, pb];
 
         return (
           <line
             key={`${a}-${b}`}
-            x1={pa.x}
-            y1={pa.y}
-            x2={pb.x}
-            y2={pb.y}
-            className={`${isHeartbeat ? "heartbeat-line" : ""} ${bothAlive ? "svg-stroke-fg" : ""}`}
-            stroke={bothAlive ? undefined : "#a1a1aa"}
+            x1={from.x}
+            y1={from.y}
+            x2={to.x}
+            y2={to.y}
+            className={isHeartbeat ? "heartbeat-line" : ""}
+            stroke={bothAlive ? (isHeartbeat ? "#3b82f6" : "#94a3b8") : "#a1a1aa"}
             strokeWidth={isHeartbeat ? 2.5 : 1.5}
-            opacity={bothAlive ? 0.2 : 0.1}
+            opacity={bothAlive ? (isHeartbeat ? 0.6 : 0.2) : 0.1}
           />
         );
       })}
