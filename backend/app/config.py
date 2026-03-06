@@ -9,6 +9,11 @@ class Settings(BaseSettings):
     port: int = 8000
     data_dir: str = "/data"
 
+    # Render: PEER_NODE1_HOSTPORT, PEER_NODE2_HOSTPORT, PEER_NODE3_HOSTPORT (host:port via fromService)
+    peer_node1_hostport: str | None = None
+    peer_node2_hostport: str | None = None
+    peer_node3_hostport: str | None = None
+
     # Election timeout bounds (seconds)
     election_timeout_min: float = 3.0
     election_timeout_max: float = 5.0
@@ -21,9 +26,19 @@ class Settings(BaseSettings):
 
     @property
     def peer_urls(self) -> list[str]:
-        if not self.peers:
-            return []
-        return [p.strip() for p in self.peers.split(",") if p.strip()]
+        if self.peers:
+            return [p.strip() for p in self.peers.split(",") if p.strip()]
+        # Build from PEER_NODE*_HOSTPORT (Render), excluding self
+        hostports = {
+            "node1": self.peer_node1_hostport,
+            "node2": self.peer_node2_hostport,
+            "node3": self.peer_node3_hostport,
+        }
+        result = []
+        for nid, hp in hostports.items():
+            if nid != self.node_id and hp:
+                result.append(f"http://{hp.strip()}")
+        return result
 
     model_config = {"env_prefix": ""}
 

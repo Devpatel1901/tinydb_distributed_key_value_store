@@ -1,0 +1,106 @@
+# TinyDB Blueprint for Render
+# See https://render.com/docs/blueprint-spec
+#
+# After first deploy: set NEXT_PUBLIC_NODE1_URL, NEXT_PUBLIC_NODE2_URL,
+# NEXT_PUBLIC_NODE3_URL on the frontend service to your backend URLs
+# (e.g. https://tinydb-node1-xxxx.onrender.com).
+
+services:
+  - type: web
+    runtime: docker
+    name: tinydb-node1
+    rootDir: backend
+    dockerContext: backend
+    dockerfilePath: ./backend/Dockerfile
+    dockerCommand: sh -c 'uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}'
+    healthCheckPath: /status
+    disk:
+      name: node1-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ID
+        value: node1
+      - key: DATA_DIR
+        value: /data
+      - key: PEER_NODE2_HOSTPORT
+        fromService:
+          name: tinydb-node2
+          type: web
+          property: hostport
+      - key: PEER_NODE3_HOSTPORT
+        fromService:
+          name: tinydb-node3
+          type: web
+          property: hostport
+
+  - type: web
+    runtime: docker
+    name: tinydb-node2
+    rootDir: backend
+    dockerContext: backend
+    dockerfilePath: ./backend/Dockerfile
+    dockerCommand: sh -c 'uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}'
+    healthCheckPath: /status
+    disk:
+      name: node2-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ID
+        value: node2
+      - key: DATA_DIR
+        value: /data
+      - key: PEER_NODE1_HOSTPORT
+        fromService:
+          name: tinydb-node1
+          type: web
+          property: hostport
+      - key: PEER_NODE3_HOSTPORT
+        fromService:
+          name: tinydb-node3
+          type: web
+          property: hostport
+
+  - type: web
+    runtime: docker
+    name: tinydb-node3
+    rootDir: backend
+    dockerContext: backend
+    dockerfilePath: ./backend/Dockerfile
+    dockerCommand: sh -c 'uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}'
+    healthCheckPath: /status
+    disk:
+      name: node3-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ID
+        value: node3
+      - key: DATA_DIR
+        value: /data
+      - key: PEER_NODE1_HOSTPORT
+        fromService:
+          name: tinydb-node1
+          type: web
+          property: hostport
+      - key: PEER_NODE2_HOSTPORT
+        fromService:
+          name: tinydb-node2
+          type: web
+          property: hostport
+
+  - type: web
+    runtime: docker
+    name: tinydb-frontend
+    rootDir: frontend
+    dockerContext: frontend
+    dockerfilePath: ./frontend/Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: NEXT_PUBLIC_NODE1_URL
+        sync: false
+      - key: NEXT_PUBLIC_NODE2_URL
+        sync: false
+      - key: NEXT_PUBLIC_NODE3_URL
+        sync: false
