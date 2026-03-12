@@ -38,6 +38,8 @@ class HeartbeatRequest(BaseModel):
 class HeartbeatResponse(BaseModel):
     term: int
     success: bool
+    log_length: int = 0
+    commit_index: int = -1
 
 
 # ---------------------------------------------------------------------------

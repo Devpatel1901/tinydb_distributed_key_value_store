@@ -8,6 +8,7 @@ import httpx
 
 from app.config import settings
 from app.models import HeartbeatRequest, HeartbeatResponse
+from app.replication import catch_up_peer
 from app.state import node_state
 
 logger = logging.getLogger("tinydb.heartbeat")
@@ -31,7 +32,22 @@ async def heartbeat_loop() -> None:
                     _send_heartbeat(client, peer, req)
                     for peer in node_state.peers
                 ]
-                await asyncio.gather(*tasks, return_exceptions=True)
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+
+            for result in results:
+                if isinstance(result, Exception):
+                    continue
+                peer_url, data = result
+                if data is None or not data.success:
+                    continue
+                if node_state.role != "leader":
+                    continue
+                peer_log_length = data.log_length
+                if (
+                    peer_log_length < len(node_state.log)
+                    and peer_log_length <= node_state.commit_index
+                ):
+                    asyncio.create_task(catch_up_peer(peer_url, peer_log_length))
 
             await asyncio.sleep(settings.heartbeat_interval)
         except asyncio.CancelledError:
@@ -45,7 +61,7 @@ async def _send_heartbeat(
     client: httpx.AsyncClient,
     peer_url: str,
     req: HeartbeatRequest,
-) -> None:
+) -> tuple[str, HeartbeatResponse | None]:
     try:
         resp = await client.post(
             f"{peer_url}/internal/heartbeat", json=req.model_dump()
@@ -58,8 +74,10 @@ async def _send_heartbeat(
                 data.term,
             )
             node_state.become_follower(data.term)
+        return (peer_url, data)
     except httpx.HTTPError:
         logger.debug("Heartbeat to %s failed", peer_url)
+        return (peer_url, None)
 
 
 def handle_heartbeat(req: HeartbeatRequest) -> HeartbeatResponse:
@@ -73,7 +91,12 @@ def handle_heartbeat(req: HeartbeatRequest) -> HeartbeatResponse:
         node_state.leader_id = req.leader_id
         node_state.last_heartbeat_ts = time.time()
 
-    return HeartbeatResponse(term=node_state.current_term, success=True)
+    return HeartbeatResponse(
+        term=node_state.current_term,
+        success=True,
+        log_length=len(node_state.log),
+        commit_index=node_state.commit_index,
+    )
 
 
 def start_heartbeat_task() -> None:

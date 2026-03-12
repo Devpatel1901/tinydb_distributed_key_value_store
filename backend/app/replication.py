@@ -81,6 +81,43 @@ async def _send_replicate(
     return ReplicateResponse(**resp.json())
 
 
+async def catch_up_peer(peer_url: str, peer_log_length: int) -> None:
+    """Send missing committed log entries to a lagging peer.
+    Called when heartbeat reveals peer_log_length < our log length."""
+    async with httpx.AsyncClient(timeout=settings.replication_timeout) as client:
+        for i in range(peer_log_length, node_state.commit_index + 1):
+            if node_state.role != "leader":
+                return
+            if i >= len(node_state.log):
+                return
+            entry = node_state.log[i]
+            req = ReplicateRequest(
+                term=node_state.current_term,
+                leader_id=node_state.node_id,
+                entry=entry,
+            )
+            try:
+                resp = await client.post(
+                    f"{peer_url}/internal/replicate", json=req.model_dump()
+                )
+                result = ReplicateResponse(**resp.json())
+                if result.term > node_state.current_term:
+                    node_state.become_follower(result.term)
+                    return
+                if not result.success:
+                    return
+            except httpx.HTTPError:
+                logger.debug("Catch-up to %s failed at index %d", peer_url, i)
+                return
+        logger.info(
+            "[%s] Catch-up: sent entries [%d..%d] to %s",
+            node_state.node_id,
+            peer_log_length,
+            node_state.commit_index,
+            peer_url,
+        )
+
+
 def handle_replicate(req: ReplicateRequest) -> ReplicateResponse:
     """Process an incoming replication request (called by the route handler)."""
     if req.term < node_state.current_term:
